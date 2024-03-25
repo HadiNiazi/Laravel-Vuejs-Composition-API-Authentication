@@ -5,7 +5,7 @@ import Register from '../components/Auth/Register.vue';
 import Login from '../components/Auth/Login.vue';
 import NotFound from '../components/Errors/404.vue';
 import Dashboard from '../components/Dashboard.vue';
-import store from '../store/index.js';
+import { useAuthStore } from '../store/index.js';
 
 const routes = [
 
@@ -52,7 +52,9 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
 
-    const isAuthenticated = store.getters.authStatus
+    const store = useAuthStore();
+
+    const isAuthenticated = store.isAuthenticated
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login')

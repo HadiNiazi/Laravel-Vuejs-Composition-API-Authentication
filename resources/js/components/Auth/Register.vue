@@ -47,58 +47,120 @@
     </div>
 </template>
 
-<script>
-export default {
 
-    data() {
+<script setup>
 
-        return {
-            name: '',
-            email: '',
-            password: '',
-            confirmed_password: '',
-            errors: [],
-            successMsg: ''
+import { ref } from 'vue';
+
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const confirmed_password = ref('');
+const errors = ref([]);
+const successMsg = ref('');
+
+
+const register = () => {
+
+    clearMessage();
+
+    if (password.value != confirmed_password.value) {
+
+        errors.value = ['Your password does not match with confirmed password'];
+        return;
+
+    }
+
+    axios.post('api/register', {
+        name: name.value,
+        email: email.value,
+        password: password.value
+    }).then( response => {
+
+        if (response.status == 201) {
+            successMsg.value = response.data.message;
         }
 
-    },
+        clearForm()
+
+    }).catch( error => {
+
+        if (error.response.status == 422) {
+            errors.value = Object.values(error.response.data.errors).flat()
+        }
+        else {
+            errors.value = ['Something went wrong']
+        }
+
+    });
+
+}
+
+const clearMessage = () => {
+    errors.value = '';
+}
+
+const clearForm = () => {
+    name.value = ''
+    email.value = ''
+    password.value = ''
+    confirmed_password.value = ''
+}
+
+</script>
+
+<!-- <script>
+export default {
+
+    // data() {
+
+    //     return {
+    //         name: '',
+    //         email: '',
+    //         password: '',
+    //         confirmed_password: '',
+    //         errors: [],
+    //         successMsg: ''
+    //     }
+
+    // },
 
     methods: {
 
-        register() {
+        // register() {
 
-            this.clearMessage();
+        //     this.clearMessage();
 
-            if (this.password != this.confirmed_password) {
+        //     if (this.password != this.confirmed_password) {
 
-                this.errors = ['Your password does not match with confirmed password'];
-                return;
+        //         this.errors = ['Your password does not match with confirmed password'];
+        //         return;
 
-            }
+        //     }
 
-            axios.post('api/register', {
-                name: this.name,
-                email: this.email,
-                password: this.password
-            }).then( response => {
+        //     axios.post('api/register', {
+        //         name: this.name,
+        //         email: this.email,
+        //         password: this.password
+        //     }).then( response => {
 
-                if (response.status == 201) {
-                    this.successMsg = response.data.message;
-                }
+        //         if (response.status == 201) {
+        //             this.successMsg = response.data.message;
+        //         }
 
-            }).catch( error => {
+        //     }).catch( error => {
 
-                if (error.response.status == 422) {
-                    this.errors = Object.values(error.response.data.errors).flat()
-                }
-                else {
-                    this.errors = ['Something went wrong']
-                }
+        //         if (error.response.status == 422) {
+        //             this.errors = Object.values(error.response.data.errors).flat()
+        //         }
+        //         else {
+        //             this.errors = ['Something went wrong']
+        //         }
 
-            });
+        //     });
 
 
-        },
+        // },
 
         clearMessage() {
             this.errors = '';
@@ -107,4 +169,4 @@ export default {
     }
 
 }
-</script>
+</script> -->

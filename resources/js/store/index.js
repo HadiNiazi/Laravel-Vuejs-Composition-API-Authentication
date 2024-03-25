@@ -1,68 +1,49 @@
-import { createStore } from 'vuex';
+import { defineStore } from "pinia";
+import { ref } from 'vue';
+import { useRouter } from "vue-router";
 
-export default createStore({
+export const useAuthStore = defineStore('auth', () => {
 
-    state: {
-        token: localStorage.getItem('token') || '' ,
-        isAuthenticated: false
-    },
+    const authToken = ref('');
+    const isAuthenticated = ref(false);
 
-    mutations: {
+    const router = useRouter();
 
-        UpdateAuthenticationStatus (state, status) {
-            state.isAuthenticated = status;
-        },
+    function checkUserAuthenticationStatus() {
+        axios.get('api/authenticated')
+            .then( response => {
+                isAuthenticated.value = response.data.status;
 
-        UpdateAuthStatus(state, status) {
-            state.isAuthenticated = status;
-        },
+                if (response.data.status == true) {
+                    router.push({
+                        name: 'dashboard'
+                    })
+                }
 
-        UpdateToken(state, token) {
-            state.token = token
-            localStorage.setItem('token', token)
-        },
-
-        resetAuth(state) {
-            state.token = null
-            state.isAuthenticated = false
-        }
-
-    },
-
-    actions: {
-
-        checkUserAuthenticationStatus( {commit} ) {
-            axios.get('api/authenticated')
-                .then( response => {
-                    commit('UpdateAuthenticationStatus', response.data.status)
-                })
-                .catch(error => {
-                })
-
-        },
-
-        SetAuthStatus( {commit}, status ) {
-         commit('UpdateAuthStatus', status);
-        },
-
-        setAuthToken({commit}, token) {
-            commit('UpdateToken', token)
-        },
-
-        logout({commit}) {
-
-            commit('resetAuth')
-
-            localStorage.removeItem('token')
-
-            delete axios.defaults.headers.common['Authorization']
-
-        }
-
-    },
-
-    getters: {
-        authStatus: state => state.isAuthenticated
+            })
+            .catch(error => {
+            })
     }
+
+    function setAuthStatus(status) {
+        isAuthenticated.value = status;
+    }
+
+    function setAuthToken(token) {
+        authToken.value = token
+        localStorage.setItem('token', token)
+    }
+
+    function logout() {
+
+        localStorage.removeItem('token')
+        delete axios.defaults.headers.common['Authorization']
+
+        isAuthenticated.value = false;
+        authToken.value = '';
+
+    }
+
+    return { logout, setAuthToken, setAuthStatus, checkUserAuthenticationStatus, isAuthenticated, authToken }
 
 });

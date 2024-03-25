@@ -28,7 +28,51 @@
 
 </template>
 
-<script>
+<script setup>
+
+import { computed, onMounted } from 'vue';
+import { useAuthStore } from '../store/index.js';
+import { useRouter } from 'vue-router';
+import axios from '../axios.js'
+
+const store = useAuthStore()
+const router = useRouter()
+
+ onMounted(() => {
+    store.checkUserAuthenticationStatus()
+ })
+
+ const isAuthenticated = computed(() => {
+
+    return store.isAuthenticated
+
+ })
+
+ const authToken = computed(() => {
+    return store.token
+ })
+
+ const logout = () => {
+
+    axios.post('api/logout')
+        .then(response => {
+
+            store.logout()
+
+            router.push({
+                name: 'login'
+            })
+
+            })
+        .catch(error => {
+            })
+
+ }
+
+
+</script>
+
+<!-- <script>
 
 import { mapGetters } from 'vuex';
 import axios from '../axios.js'
@@ -78,4 +122,4 @@ export default {
 
 }
 
-</script>
+</script> -->

@@ -35,21 +35,84 @@
     </div>
 </template>
 
-<script>
+<script setup>
+
+import { ref } from 'vue';
+import { useAuthStore } from '../../store/index.js';
+import { useRouter } from 'vue-router';
+
+const store = useAuthStore();
+const router = useRouter();
+
+const email = ref('');
+const password = ref('');
+const errors = ref([]);
+
+const login = () => {
+
+   clearMessage();
+
+    axios.get('/sanctum/csrf-cookie').then(response => {
+
+        axios.post('api/login', {
+            email: email.value,
+            password: password.value
+        }).then( response => {
+
+            if (response.status == 201) {
+
+                const status = true;
+                const token = response.data.token
+
+                store.setAuthToken(token)
+
+                store.setAuthStatus(status)
+
+                router.push({
+                    name: 'dashboard'
+                })
+
+            }
+
+        }).catch( error => {
+
+            console.log(error)
+
+            if (error.response.status == 422) {
+                errors.value = Object.values(error.response.data.errors).flat()
+            }
+            else {
+                errors.value = ['Something went wrong']
+            }
+
+        });
+
+    });
+
+}
+
+const clearMessage = () => {
+    errors.value = [];
+}
+
+
+</script>
+
+<!-- <script>
 
 export default {
 
-    data() {
+    // data() {
 
-        return {
+    //     return {
 
-            email: '',
-            password: '',
-            errors: [],
+    //         email: '',
+    //         password: '',
+    //         errors: [],
 
-        }
+    //     }
 
-    },
+    // },
 
     methods: {
 
@@ -101,4 +164,4 @@ export default {
     }
 
 }
-</script>
+</script> -->
